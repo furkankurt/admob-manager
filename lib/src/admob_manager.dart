@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:admob_manager_flutter/admob_manager_flutter.dart';
 import 'package:admob_manager_flutter/src/ad_base.dart';
@@ -8,6 +9,7 @@ import 'package:admob_manager_flutter/src/utils/auto_hiding_loader_dialog.dart';
 import 'package:admob_manager_flutter/src/utils/ad_event_controller.dart';
 import 'package:admob_manager_flutter/src/utils/admob_logger.dart';
 import 'package:admob_manager_flutter/src/utils/extensions.dart';
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
@@ -67,11 +69,21 @@ class AdmobManager {
 
     final admobAdId = manager.admobAdIds?.appId;
     if (admobAdId != null && admobAdId.isNotEmpty) {
+      if (Platform.isIOS) {
+        final appTrackingTransparencyStatus =
+            await AppTrackingTransparency.requestTrackingAuthorization();
+        final uuid = await AppTrackingTransparency.getAdvertisingIdentifier();
+
+        _logger.logInfo(
+            'AppTrackingTransparency status: ${appTrackingTransparencyStatus.name}'
+            ', advertisingIdentifier (UUID): $uuid');
+      }
+
       final response = await MobileAds.instance.initialize();
       final status = response.adapterStatuses.values.firstOrNull?.state;
 
       _eventController.fireNetworkInitializedEvent(
-           status == AdapterInitializationState.ready);
+          status == AdapterInitializationState.ready);
 
       // Initializing admob Ads
       await AdmobManager.instance._initAdmob(
@@ -108,8 +120,7 @@ class AdmobManager {
   }) async {
     // init interstitial ads
     if (interstitialAdUnitId != null &&
-        _interstitialAds.doesNotContain(
-             AdUnitType.interstitial)) {
+        _interstitialAds.doesNotContain(AdUnitType.interstitial)) {
       final ad = AdmobInterstitialAd(
           interstitialAdUnitId, _adRequest, immersiveModeEnabled);
       _interstitialAds.add(ad);
@@ -120,7 +131,7 @@ class AdmobManager {
 
     // init rewarded ads
     if (rewardedAdUnitId != null &&
-        _rewardedAds.doesNotContain( AdUnitType.rewarded)) {
+        _rewardedAds.doesNotContain(AdUnitType.rewarded)) {
       final ad =
           AdmobRewardedAd(rewardedAdUnitId, _adRequest, immersiveModeEnabled);
       _rewardedAds.add(ad);
@@ -130,7 +141,7 @@ class AdmobManager {
     }
 
     if (appOpenAdUnitId != null &&
-        _appOpenAds.doesNotContain( AdUnitType.appOpen)) {
+        _appOpenAds.doesNotContain(AdUnitType.appOpen)) {
       final appOpenAdManager =
           AdmobAppOpenAd(appOpenAdUnitId, _adRequest, appOpenAdOrientation);
       await appOpenAdManager.load();

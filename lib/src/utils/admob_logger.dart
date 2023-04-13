@@ -6,7 +6,16 @@ import 'package:logger/logger.dart';
 /// [AdmobLogger] is used to listen to the callbacks in stream & show logs
 class AdmobLogger {
   /// [Logger] is used to show logs in console for [AdmobManager]
-  final _logger = Logger();
+  final _logger = Logger(
+    printer: PrettyPrinter(
+      methodCount: 0,
+      errorMethodCount: 5,
+      lineLength: 50,
+      colors: true,
+      printEmojis: true,
+      printTime: true,
+    ),
+  );
   StreamSubscription? streamSubscription;
 
   void enable(bool enabled) {
