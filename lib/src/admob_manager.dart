@@ -4,10 +4,12 @@ import 'dart:io';
 import 'package:admob_manager_flutter/admob_manager_flutter.dart';
 import 'package:admob_manager_flutter/src/ad_base.dart';
 import 'package:admob_manager_flutter/src/admob/admob_interstitial_ad.dart';
+import 'package:admob_manager_flutter/src/admob/admob_native_ad.dart';
 import 'package:admob_manager_flutter/src/admob/admob_rewarded_ad.dart';
-import 'package:admob_manager_flutter/src/utils/auto_hiding_loader_dialog.dart';
+import 'package:admob_manager_flutter/src/admob/admob_rewarded_int_ad.dart';
 import 'package:admob_manager_flutter/src/utils/ad_event_controller.dart';
 import 'package:admob_manager_flutter/src/utils/admob_logger.dart';
+import 'package:admob_manager_flutter/src/utils/auto_hiding_loader_dialog.dart';
 import 'package:admob_manager_flutter/src/utils/extensions.dart';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:collection/collection.dart';
@@ -25,7 +27,11 @@ class AdmobManager {
   final _eventController = AdEventController();
   Stream<AdEvent> get onEvent => _eventController.onEvent;
 
-  List<AdBase> get _allAds => [..._interstitialAds, ..._rewardedAds];
+  List<AdBase> get _allAds => [
+        ..._interstitialAds,
+        ..._rewardedAds,
+        ..._rewardedInterstitialAds,
+      ];
 
   /// All the interstitial ads will be stored in it
   final List<AdBase> _appOpenAds = [];
@@ -35,6 +41,9 @@ class AdmobManager {
 
   /// All the rewarded ads will be stored in it
   final List<AdBase> _rewardedAds = [];
+
+  /// All the rewarded ads will be stored in it
+  final List<AdBase> _rewardedInterstitialAds = [];
 
   /// [_logger] is used to show Ad logs in the console
   final AdmobLogger _logger = AdmobLogger();
@@ -89,6 +98,8 @@ class AdmobManager {
       await AdmobManager.instance._initAdmob(
         appOpenAdUnitId: manager.admobAdIds?.appOpenId,
         interstitialAdUnitId: manager.admobAdIds?.interstitialId,
+        rewardedInterstitialAdUnitId:
+            manager.admobAdIds?.rewardedInterstitialId,
         rewardedAdUnitId: manager.admobAdIds?.rewardedId,
         appOpenAdOrientation: appOpenAdOrientation,
       );
@@ -111,9 +122,36 @@ class AdmobManager {
     return ad;
   }
 
+  /// Returns [AdBase] if ad is created successfully. It assumes that you have already assigned banner id in Ad Id Manager
+  ///
+  /// if [adNetwork] is provided, only that network's ad would be created. For now, only unity and admob banner is supported
+  /// [adSize] is used to provide ad banner size
+  AdBase? createNative({
+    required NativeTemplateStyle style,
+    NativeAdOptions? options,
+    BoxConstraints? constraints,
+  }) {
+    AdBase? ad;
+    final nativeId = adIdManager.admobAdIds?.nativeId;
+    assert(nativeId != null,
+        'You are trying to create a native and Admob Native id is null in ad id manager');
+    if (nativeId != null) {
+      ad = AdmobNativeAd(
+        nativeId,
+        style: style,
+        adRequest: _adRequest,
+        constraints: constraints,
+        nativeAdOptions: options,
+      );
+      _eventController.setupEvents(ad);
+    }
+    return ad;
+  }
+
   Future<void> _initAdmob({
     String? appOpenAdUnitId,
     String? interstitialAdUnitId,
+    String? rewardedInterstitialAdUnitId,
     String? rewardedAdUnitId,
     bool immersiveModeEnabled = true,
     int appOpenAdOrientation = AppOpenAd.orientationPortrait,
@@ -124,6 +162,18 @@ class AdmobManager {
       final ad = AdmobInterstitialAd(
           interstitialAdUnitId, _adRequest, immersiveModeEnabled);
       _interstitialAds.add(ad);
+      _eventController.setupEvents(ad);
+
+      await ad.load();
+    }
+
+    // init interstitial ads
+    if (rewardedInterstitialAdUnitId != null &&
+        _rewardedInterstitialAds
+            .doesNotContain(AdUnitType.rewardedInterstitial)) {
+      final ad = AdmobRewardedIntAd(
+          rewardedInterstitialAdUnitId, _adRequest, immersiveModeEnabled);
+      _rewardedInterstitialAds.add(ad);
       _eventController.setupEvents(ad);
 
       await ad.load();
@@ -170,6 +220,8 @@ class AdmobManager {
       ads = _rewardedAds;
     } else if (adUnitType == AdUnitType.interstitial) {
       ads = _interstitialAds;
+    } else if (adUnitType == AdUnitType.rewardedInterstitial) {
+      ads = _rewardedInterstitialAds;
     } else if (adUnitType == AdUnitType.appOpen) {
       ads = _appOpenAds;
     }
@@ -196,7 +248,8 @@ class AdmobManager {
 
     for (final ad in ads) {
       if (ad.isAdLoaded) {
-        if (ad.adUnitType == AdUnitType.interstitial &&
+        if ((ad.adUnitType == AdUnitType.interstitial ||
+                ad.adUnitType == AdUnitType.rewardedInterstitial) &&
             shouldShowLoader &&
             context != null) {
           showLoaderDialog(context, delay: delayInSeconds)
@@ -227,6 +280,10 @@ class AdmobManager {
     for (final e in _interstitialAds) {
       e.load();
     }
+
+    for (final e in _rewardedInterstitialAds) {
+      e.load();
+    }
   }
 
   /// Returns bool indicating whether ad has been loaded
@@ -240,6 +297,13 @@ class AdmobManager {
   ///
   bool isInterstitialAdLoaded() {
     final ad = _interstitialAds.firstWhereOrNull((e) => e.isAdLoaded);
+    return ad?.isAdLoaded ?? false;
+  }
+
+  /// Returns bool indicating whether ad has been loaded
+  ///
+  bool isRewardedInterstitialAdLoaded() {
+    final ad = _rewardedInterstitialAds.firstWhereOrNull((e) => e.isAdLoaded);
     return ad?.isAdLoaded ?? false;
   }
 

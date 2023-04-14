@@ -23,8 +23,7 @@ class _AdmobBannerAdWidgetState extends State<AdmobBannerAdWidget> {
       return BadgedBanner(child: _bannerAd?.show(), adSize: widget.adSize);
     }
 
-    return _bannerAd?.show() ??
-        Container(height: widget.adSize.height.toDouble());
+    return _bannerAd?.show() ?? const SizedBox();
   }
 
   @override

@@ -22,6 +22,7 @@ abstract class AdBase {
   AdFailedCallback? onAdFailedToShow;
   AdCallback? onAdDismissed;
   AdCallback? onBannerAdReadyForSetState;
+  AdCallback? onNativeAdReadyForSetState;
   AdEarnedReward? onEarnedReward;
 }
 

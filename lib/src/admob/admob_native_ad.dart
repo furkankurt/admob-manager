@@ -4,9 +4,15 @@ import 'package:flutter/material.dart';
 
 class AdmobNativeAd extends AdBase {
   final AdRequest _adRequest;
+  final NativeTemplateStyle? style;
+  final NativeAdOptions? nativeAdOptions;
+  final BoxConstraints? constraints;
 
   AdmobNativeAd(
     String adUnitId, {
+    this.style,
+    this.nativeAdOptions,
+    this.constraints,
     AdRequest? adRequest,
   })  : _adRequest = adRequest ?? const AdRequest(),
         super(adUnitId);
@@ -34,40 +40,41 @@ class AdmobNativeAd extends AdBase {
     _isAdLoaded = false;
 
     _nativeAd = NativeAd(
-      nativeTemplateStyle: NativeTemplateStyle(
-        // Required: Choose a template.
-        templateType: TemplateType.medium,
-        // Optional: Customize the ad's style.
-        mainBackgroundColor: Colors.purple,
-        cornerRadius: 10.0,
-        callToActionTextStyle: NativeTemplateTextStyle(
-            textColor: Colors.cyan,
-            backgroundColor: Colors.red,
-            style: NativeTemplateFontStyle.monospace,
-            size: 16.0),
-        primaryTextStyle: NativeTemplateTextStyle(
-            textColor: Colors.red,
-            backgroundColor: Colors.cyan,
-            style: NativeTemplateFontStyle.italic,
-            size: 16.0),
-        secondaryTextStyle: NativeTemplateTextStyle(
-            textColor: Colors.green,
-            backgroundColor: Colors.black,
-            style: NativeTemplateFontStyle.bold,
-            size: 16.0),
-        tertiaryTextStyle: NativeTemplateTextStyle(
-            textColor: Colors.brown,
-            backgroundColor: Colors.amber,
-            style: NativeTemplateFontStyle.normal,
-            size: 16.0),
-      ),
+      nativeTemplateStyle: style ??
+          NativeTemplateStyle(
+            // Required: Choose a template.
+            templateType: TemplateType.medium,
+            // Optional: Customize the ad's style.
+            mainBackgroundColor: Colors.purple,
+            cornerRadius: 10.0,
+            callToActionTextStyle: NativeTemplateTextStyle(
+                textColor: Colors.cyan,
+                backgroundColor: Colors.red,
+                style: NativeTemplateFontStyle.monospace,
+                size: 16.0),
+            primaryTextStyle: NativeTemplateTextStyle(
+                textColor: Colors.red,
+                backgroundColor: Colors.cyan,
+                style: NativeTemplateFontStyle.italic,
+                size: 16.0),
+            secondaryTextStyle: NativeTemplateTextStyle(
+                textColor: Colors.green,
+                backgroundColor: Colors.black,
+                style: NativeTemplateFontStyle.bold,
+                size: 16.0),
+            tertiaryTextStyle: NativeTemplateTextStyle(
+                textColor: Colors.brown,
+                backgroundColor: Colors.amber,
+                style: NativeTemplateFontStyle.normal,
+                size: 16.0),
+          ),
       adUnitId: adUnitId,
       listener: NativeAdListener(
         onAdLoaded: (Ad ad) {
           _nativeAd = ad as NativeAd?;
           _isAdLoaded = true;
           onAdLoaded?.call(adUnitType, ad);
-          onBannerAdReadyForSetState?.call(adUnitType, ad);
+          onNativeAdReadyForSetState?.call(adUnitType, ad);
         },
         onAdFailedToLoad: (Ad ad, LoadAdError error) {
           _nativeAd = null;
@@ -80,45 +87,41 @@ class AdmobNativeAd extends AdBase {
         onAdImpression: (Ad ad) => onAdShowed?.call(adUnitType, ad),
       ),
       request: _adRequest,
+      nativeAdOptions: nativeAdOptions,
     );
     _nativeAd?.load();
   }
 
   @override
   dynamic show() {
+    if (_nativeAd == null || _isAdLoaded == false) {
+      load();
+      return const SizedBox();
+    }
+
     // Small template
     final smallAdContainer = ConstrainedBox(
-      constraints: const BoxConstraints(
-        minWidth: 320, // minimum recommended width
-        minHeight: 90, // minimum recommended height
-        maxWidth: 400,
-        maxHeight: 200,
-      ),
+      constraints: constraints ??
+          const BoxConstraints(
+            minWidth: 320, // minimum recommended width
+            minHeight: 90, // minimum recommended height
+            maxWidth: 400,
+            maxHeight: 200,
+          ),
       child: AdWidget(ad: _nativeAd!),
     );
 
 // Medium template
     final mediumAdContainer = ConstrainedBox(
-      constraints: const BoxConstraints(
-        minWidth: 320, // minimum recommended width
-        minHeight: 320, // minimum recommended height
-        maxWidth: 400,
-        maxHeight: 400,
-      ),
+      constraints: constraints ??
+          const BoxConstraints(
+            minWidth: 320, // minimum recommended width
+            minHeight: 320, // minimum recommended height
+            maxWidth: 400,
+            maxHeight: 400,
+          ),
       child: AdWidget(ad: _nativeAd!),
     );
-    if (_nativeAd == null || _isAdLoaded == false) {
-      load();
-      return ConstrainedBox(
-        constraints: const BoxConstraints(
-          minWidth: 320, // minimum recommended width
-          minHeight: 320, // minimum recommended height
-          maxWidth: 400,
-          maxHeight: 400,
-        ),
-      );
-    }
-
     return mediumAdContainer;
   }
 }

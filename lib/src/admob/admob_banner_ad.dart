@@ -1,4 +1,3 @@
-
 import 'package:admob_manager_flutter/src/ad_base.dart';
 import 'package:admob_manager_flutter/src/enums/ad_unit_type.dart';
 import 'package:flutter/material.dart';
@@ -66,10 +65,7 @@ class AdmobBannerAd extends AdBase {
   dynamic show() {
     if (_bannerAd == null || _isAdLoaded == false) {
       load();
-      return SizedBox(
-        height: adSize.height.toDouble(),
-        width: adSize.width.toDouble(),
-      );
+      return const SizedBox();
     }
 
     return Container(
