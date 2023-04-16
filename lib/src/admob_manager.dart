@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:admob_manager_flutter/admob_manager_flutter.dart';
 import 'package:admob_manager_flutter/src/ad_base.dart';
 import 'package:admob_manager_flutter/src/admob/admob_interstitial_ad.dart';
-import 'package:admob_manager_flutter/src/admob/admob_native_ad.dart';
 import 'package:admob_manager_flutter/src/admob/admob_rewarded_ad.dart';
 import 'package:admob_manager_flutter/src/admob/admob_rewarded_int_ad.dart';
 import 'package:admob_manager_flutter/src/utils/ad_event_controller.dart';
@@ -48,10 +47,6 @@ class AdmobManager {
   /// [_logger] is used to show Ad logs in the console
   final AdmobLogger _logger = AdmobLogger();
 
-  /// On banner, ad badge will appear
-  bool get showAdBadge => _showAdBadge;
-  bool _showAdBadge = false;
-
   /// Initializes the Google Mobile Ads SDK.
   ///
   /// Call this method as early as possible after the app launches
@@ -65,7 +60,6 @@ class AdmobManager {
     int appOpenAdOrientation = AppOpenAd.orientationPortrait,
     bool showAdBadge = false,
   }) async {
-    _showAdBadge = showAdBadge;
     if (enableLogger) _logger.enable(enableLogger);
     adIdManager = manager;
     if (adMobAdRequest != null) {
@@ -76,8 +70,8 @@ class AdmobManager {
       MobileAds.instance.updateRequestConfiguration(admobConfiguration);
     }
 
-    final admobAdId = manager.admobAdIds?.appId;
-    if (admobAdId != null && admobAdId.isNotEmpty) {
+    final admobAdId = manager.appId;
+    if (admobAdId.isNotEmpty) {
       if (Platform.isIOS) {
         final appTrackingTransparencyStatus =
             await AppTrackingTransparency.requestTrackingAuthorization();
@@ -96,56 +90,13 @@ class AdmobManager {
 
       // Initializing admob Ads
       await AdmobManager.instance._initAdmob(
-        appOpenAdUnitId: manager.admobAdIds?.appOpenId,
-        interstitialAdUnitId: manager.admobAdIds?.interstitialId,
-        rewardedInterstitialAdUnitId:
-            manager.admobAdIds?.rewardedInterstitialId,
-        rewardedAdUnitId: manager.admobAdIds?.rewardedId,
+        appOpenAdUnitId: manager.appOpenId,
+        interstitialAdUnitId: manager.interstitialId,
+        rewardedInterstitialAdUnitId: manager.rewardedInterstitialId,
+        rewardedAdUnitId: manager.rewardedId,
         appOpenAdOrientation: appOpenAdOrientation,
       );
     }
-  }
-
-  /// Returns [AdBase] if ad is created successfully. It assumes that you have already assigned banner id in Ad Id Manager
-  ///
-  /// if [adNetwork] is provided, only that network's ad would be created. For now, only unity and admob banner is supported
-  /// [adSize] is used to provide ad banner size
-  AdBase? createBanner({AdSize adSize = AdSize.banner}) {
-    AdBase? ad;
-    final bannerId = adIdManager.admobAdIds?.bannerId;
-    assert(bannerId != null,
-        'You are trying to create a banner and Admob Banner id is null in ad id manager');
-    if (bannerId != null) {
-      ad = AdmobBannerAd(bannerId, adSize: adSize, adRequest: _adRequest);
-      _eventController.setupEvents(ad);
-    }
-    return ad;
-  }
-
-  /// Returns [AdBase] if ad is created successfully. It assumes that you have already assigned banner id in Ad Id Manager
-  ///
-  /// if [adNetwork] is provided, only that network's ad would be created. For now, only unity and admob banner is supported
-  /// [adSize] is used to provide ad banner size
-  AdBase? createNative({
-    required NativeTemplateStyle style,
-    NativeAdOptions? options,
-    BoxConstraints? constraints,
-  }) {
-    AdBase? ad;
-    final nativeId = adIdManager.admobAdIds?.nativeId;
-    assert(nativeId != null,
-        'You are trying to create a native and Admob Native id is null in ad id manager');
-    if (nativeId != null) {
-      ad = AdmobNativeAd(
-        nativeId,
-        style: style,
-        adRequest: _adRequest,
-        constraints: constraints,
-        nativeAdOptions: options,
-      );
-      _eventController.setupEvents(ad);
-    }
-    return ad;
   }
 
   Future<void> _initAdmob({

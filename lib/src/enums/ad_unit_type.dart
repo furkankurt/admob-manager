@@ -2,10 +2,8 @@ import 'package:flutter/foundation.dart';
 
 enum AdUnitType {
   appOpen,
-  banner,
   interstitial,
   rewarded,
-  native,
   rewardedInterstitial,
 }
 
