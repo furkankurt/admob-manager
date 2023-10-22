@@ -1,6 +1,6 @@
 name: admob_manager_flutter
 description: Admob Manager is a wrapper around famous ad packages which let you integrate ads easily
-version: 2.3.3
+version: 2.3.4
 homepage: https://github.com/furkankurt/admob-manager
 repository: https://github.com/furkankurt/admob-manager
 
@@ -12,11 +12,11 @@ dependencies:
   flutter:
     sdk: flutter
   app_tracking_transparency: ^2.0.4
-  google_mobile_ads: ^3.0.0
+  google_mobile_ads: ^3.1.0
   collection: ^1.17.2
-  logger: ^2.0.1
+  logger: ^2.0.2+1
 
 dev_dependencies:
-  flutter_lints: ^2.0.2
+  flutter_lints: ^2.0.3
 
 flutter:
