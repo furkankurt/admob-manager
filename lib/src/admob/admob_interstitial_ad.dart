@@ -7,10 +7,10 @@ class AdmobInterstitialAd extends AdBase {
   final bool _immersiveModeEnabled;
 
   AdmobInterstitialAd(
-    String adUnitId,
+    super.adUnitId,
     this._adRequest,
     this._immersiveModeEnabled,
-  ) : super(adUnitId);
+  );
 
   InterstitialAd? _interstitialAd;
   bool _isAdLoaded = false;

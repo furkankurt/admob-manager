@@ -47,6 +47,9 @@ class AdmobManager {
   /// [_logger] is used to show Ad logs in the console
   final AdmobLogger _logger = AdmobLogger();
 
+  /// Consent Request Parameters
+  final params = ConsentRequestParameters();
+
   /// Initializes the Google Mobile Ads SDK.
   ///
   /// Call this method as early as possible after the app launches
@@ -57,7 +60,6 @@ class AdmobManager {
     AdRequest? adMobAdRequest,
     RequestConfiguration? admobConfiguration,
     bool enableLogger = true,
-    int appOpenAdOrientation = AppOpenAd.orientationPortrait,
     bool showAdBadge = false,
   }) async {
     if (enableLogger) _logger.enable(enableLogger);
@@ -88,15 +90,48 @@ class AdmobManager {
       _eventController.fireNetworkInitializedEvent(
           status == AdapterInitializationState.ready);
 
+      loadConsentInformation();
+
       // Initializing admob Ads
       await AdmobManager.instance._initAdmob(
         appOpenAdUnitId: manager.appOpenId,
         interstitialAdUnitId: manager.interstitialId,
         rewardedInterstitialAdUnitId: manager.rewardedInterstitialId,
         rewardedAdUnitId: manager.rewardedId,
-        appOpenAdOrientation: appOpenAdOrientation,
       );
     }
+  }
+
+  void loadConsentInformation() {
+    ConsentInformation.instance.requestConsentInfoUpdate(
+      params,
+      () async {
+        if (await ConsentInformation.instance.isConsentFormAvailable()) {
+          loadConsentForm();
+        }
+      },
+      (FormError error) {
+        // Handle the error
+      },
+    );
+  }
+
+  void loadConsentForm() {
+    ConsentForm.loadConsentForm(
+      (ConsentForm consentForm) async {
+        var status = await ConsentInformation.instance.getConsentStatus();
+        if (status == ConsentStatus.required) {
+          consentForm.show((_) => loadConsentForm());
+        }
+      },
+      (formError) {
+        // Handle the error
+      },
+    );
+  }
+
+  void resetConsent() {
+    ConsentInformation.instance.reset();
   }
 
   Future<void> _initAdmob({
@@ -105,7 +140,6 @@ class AdmobManager {
     String? rewardedInterstitialAdUnitId,
     String? rewardedAdUnitId,
     bool immersiveModeEnabled = true,
-    int appOpenAdOrientation = AppOpenAd.orientationPortrait,
   }) async {
     // init interstitial ads
     if (interstitialAdUnitId != null &&
@@ -143,8 +177,7 @@ class AdmobManager {
 
     if (appOpenAdUnitId != null &&
         _appOpenAds.doesNotContain(AdUnitType.appOpen)) {
-      final appOpenAdManager =
-          AdmobAppOpenAd(appOpenAdUnitId, _adRequest, appOpenAdOrientation);
+      final appOpenAdManager = AdmobAppOpenAd(appOpenAdUnitId, _adRequest);
       await appOpenAdManager.load();
       _appLifecycleReactor =
           AppLifecycleReactor(appOpenAdManager: appOpenAdManager);

@@ -3,9 +3,8 @@ import 'package:admob_manager_flutter/src/ad_base.dart';
 
 class AdmobAppOpenAd extends AdBase {
   final AdRequest _adRequest;
-  final int _orientation;
 
-  AdmobAppOpenAd(super.adUnitId, this._adRequest, this._orientation);
+  AdmobAppOpenAd(super.adUnitId, this._adRequest);
   AppOpenAd? _appOpenAd;
   bool _isShowingAd = false;
 
@@ -28,7 +27,6 @@ class AdmobAppOpenAd extends AdBase {
     return AppOpenAd.load(
       adUnitId: adUnitId,
       request: _adRequest,
-      orientation: _orientation,
       adLoadCallback: AppOpenAdLoadCallback(
         onAdLoaded: (AppOpenAd ad) {
           _appOpenAd = ad;
