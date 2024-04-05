@@ -10,8 +10,8 @@ class AdmobNativeAdWidget extends StatefulWidget {
     required this.style,
     this.options,
     this.constraints,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<AdmobNativeAdWidget> createState() => _AdmobNativeAdWidgetState();

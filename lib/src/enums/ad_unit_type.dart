@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 enum AdUnitType {
   appOpen,
   banner,
@@ -10,5 +8,5 @@ enum AdUnitType {
 }
 
 extension AdUnitTypeExtension on AdUnitType {
-  String get value => describeEnum(this);
+  String get value => name;
 }

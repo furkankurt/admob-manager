@@ -7,10 +7,10 @@ class AdmobRewardedAd extends AdBase {
   final bool _immersiveModeEnabled;
 
   AdmobRewardedAd(
-    String adUnitId,
+    super.adUnitId,
     this._adRequest,
     this._immersiveModeEnabled,
-  ) : super(adUnitId);
+  );
 
   RewardedAd? _rewardedAd;
   bool _isAdLoaded = false;

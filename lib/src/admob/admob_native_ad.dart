@@ -9,13 +9,12 @@ class AdmobNativeAd extends AdBase {
   final BoxConstraints? constraints;
 
   AdmobNativeAd(
-    String adUnitId, {
+    super.adUnitId, {
     this.style,
     this.nativeAdOptions,
     this.constraints,
     AdRequest? adRequest,
-  })  : _adRequest = adRequest ?? const AdRequest(),
-        super(adUnitId);
+  }) : _adRequest = adRequest ?? const AdRequest();
 
   NativeAd? _nativeAd;
   bool _isAdLoaded = false;
@@ -100,6 +99,7 @@ class AdmobNativeAd extends AdBase {
     }
 
     // Small template
+    // ignore: unused_local_variable
     final smallAdContainer = ConstrainedBox(
       constraints: constraints ??
           const BoxConstraints(

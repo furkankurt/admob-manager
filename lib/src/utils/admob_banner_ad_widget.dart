@@ -7,8 +7,8 @@ class AdmobBannerAdWidget extends StatefulWidget {
   final AdSize adSize;
   const AdmobBannerAdWidget({
     this.adSize = AdSize.banner,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<AdmobBannerAdWidget> createState() => _AdmobBannerAdWidgetState();

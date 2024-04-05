@@ -8,11 +8,10 @@ class AdmobBannerAd extends AdBase {
   final AdSize adSize;
 
   AdmobBannerAd(
-    String adUnitId, {
+    super.adUnitId, {
     AdRequest? adRequest,
     this.adSize = AdSize.banner,
-  })  : _adRequest = adRequest ?? const AdRequest(),
-        super(adUnitId);
+  }) : _adRequest = adRequest ?? const AdRequest();
 
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;

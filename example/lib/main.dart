@@ -19,7 +19,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
 }
 
 class CountryListScreen extends StatefulWidget {
-  const CountryListScreen({Key? key}) : super(key: key);
+  const CountryListScreen({super.key});
 
   @override
   State<CountryListScreen> createState() => _CountryListScreenState();
@@ -148,7 +148,7 @@ class _CountryListScreenState extends State<CountryListScreen> {
 }
 
 class CountryDetailScreen extends StatefulWidget {
-  const CountryDetailScreen({Key? key}) : super(key: key);
+  const CountryDetailScreen({super.key});
 
   @override
   State<CountryDetailScreen> createState() => _CountryDetailScreenState();
@@ -197,8 +197,7 @@ class _CountryDetailScreenState extends State<CountryDetailScreen> {
 class AdButton extends StatelessWidget {
   final String networkName;
   final VoidCallback onTap;
-  const AdButton({Key? key, required this.onTap, required this.networkName})
-      : super(key: key);
+  const AdButton({super.key, required this.onTap, required this.networkName});
 
   @override
   Widget build(BuildContext context) {

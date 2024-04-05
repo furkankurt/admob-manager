@@ -6,10 +6,10 @@ class AdmobRewardedIntAd extends AdBase {
   final bool _immersiveModeEnabled;
 
   AdmobRewardedIntAd(
-    String adUnitId,
+    super.adUnitId,
     this._adRequest,
     this._immersiveModeEnabled,
-  ) : super(adUnitId);
+  );
 
   RewardedInterstitialAd? _rewardedIntAd;
   bool _isAdLoaded = false;
